@@ -1,29 +1,51 @@
 pipeline {
     agent any
-    stages{
-        stage("Clone Code"){
-            steps{
-                git url: "https://github.com/LondheShubham153/django-notes-app.git", branch: "main"
+
+    stages {
+
+        stage('Pull Code From GitHub') {
+            steps {
+                git branch: 'dev', url: 'https://github.com/Ken-richard123/django-notes-app.git'
             }
         }
-        stage("Build and Test"){
-            steps{
-                sh "docker build . -t note-app-test-new"
+
+        stage('Build the Docker Image') {
+            steps {
+                sh "docker build -t raja:v1 ."
             }
         }
-        stage("Push to Docker Hub"){
-            steps{
-                withCredentials([usernamePassword(credentialsId:"dockerHub",passwordVariable:"dockerHubPass",usernameVariable:"dockerHubUser")]){
-                sh "docker tag note-app-test-new ${env.dockerHubUser}/note-app-test-new:latest"
-                sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}"
-                sh "docker push ${env.dockerHubUser}/note-app-test-new:latest"
+
+        stage('Create a Container') {
+            steps {
+                sh "docker run -itd raja:v1"
+            }
+        }
+
+        stage('Login to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: '610958c1-0e5e-45cd-9ac3-0ebc91bab47c',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
                 }
             }
         }
-        stage("Deploy"){
-            steps{
-                sh "docker-compose down && docker-compose up -d"
+
+        stage('Push the Docker Image') {
+            steps {
+                sh "docker tag raja:v1 kendanel/raja:v1"
+                sh "docker push kendanel/raja:v1"
             }
         }
+
+        stage('Deploy on Kubernetes') {
+            steps {
+                sh 'kubectl apply -f service.yml'
+                sh 'kubectl apply -f deployment.yml'
+            }
+        }
+
     }
 }
