@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: lwm-deployment
 spec:
-  replicas: 3
+  replicas: 5
   selector:
     matchLabels:
       app: pink
@@ -12,9 +12,18 @@ spec:
       labels:
         app: pink
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - ip-192-168-73-166.eu-west-2.compute.internal
       containers:
-      - name: cont1
-        image: kendanel/raja:v1
-        ports:
-          - containerPort: 8000
+        - name: cont1
+          image: kendanel/raja:v1
+          ports:
+            - containerPort: 8000
 
