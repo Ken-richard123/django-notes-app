@@ -16,4 +16,5 @@ spec:
       - name: cont1
         image: kendanel/raja:v1
         ports:
-          - containerPort: 8000
+        - containerPort: 8000
+
