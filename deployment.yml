@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lwm-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: pink
+  template:
+    metadata:
+      labels:
+        app: pink
+    spec:
+      containers:
+      - name: cont1
+        image: kendanel/raja:v1
+        ports:
+          - containerPort: 8000
